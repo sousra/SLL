@@ -37,8 +37,8 @@ public:
     SLL();
 
     SLL(const SLL& other);
-    SLL& operator=(const SLL& other);
     SLL(SLL&& other) noexcept;
+    SLL& operator=(const SLL& other);
     SLL& operator=(SLL&& other) noexcept;
     ~SLL();
 
@@ -49,7 +49,7 @@ public:
     void erase(size_t idx);
     void clear();
 
-    ValueType& front();
+    ValueType& front() const;
     ValueType& operator[](size_t idx);
     const ValueType& operator[](size_t idx) const;
 

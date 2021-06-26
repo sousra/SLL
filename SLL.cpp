@@ -1,9 +1,11 @@
 #include "SLL.h"
-
-#include <cassert>
+#include <iostream>
+#include <exception>
 
 SLL::Node* SLL::getNode(size_t idx) {
-    assert(idx < _size);
+    if (idx < 0 || idx >= _size) {
+        throw std::out_of_range("Invalid index");
+    }
     Node* cur = _head;
     size_t i = 0;
     while(i != idx) {
@@ -26,6 +28,13 @@ SLL::SLL(const SLL& other) {
     }
 }
 
+SLL::SLL(SLL&& other) noexcept {
+    _head = other._head;
+    _size = other._size;
+    other._head = nullptr;
+    other._size = 0;
+}
+
 SLL& SLL::operator=(const SLL& other) {
     clear();
     Node* curNode = other._head;
@@ -33,13 +42,7 @@ SLL& SLL::operator=(const SLL& other) {
         insert(_size, curNode->_value);
         curNode = curNode->_next;
     }
-}
-
-SLL::SLL(SLL&& other) noexcept {
-    _head = other._head;
-    _size = other._size;
-    other._head = nullptr;
-    other._size = 0;
+    return *this;
 }
 
 SLL& SLL::operator=(SLL&& other) noexcept {
@@ -63,29 +66,44 @@ void SLL::insert(size_t idx, ValueType value) {
     if (idx == 0) {
         pushFront(value);
     }
-    else {
+    else if (idx > 0 && idx <= _size) {
         Node* cur = new Node(value);
         Node* prev = getNode(idx - 1);
         cur->_next = prev->_next;
         prev->_next = cur;
         ++_size;
     }
+    else {
+        throw std::out_of_range("Invalid index");
+    }
 }
 
 void SLL::popFront() {
-    assert(_size != 0);
-    Node* temp = _head;
-    _head = _head->_next;
-    delete temp;
-    --_size;
+    if (_head) {
+        Node* temp = _head;
+        _head = _head->_next;
+        delete temp;
+        --_size;
+    }
+    else {
+        throw std::logic_error("Empty linked list");
+    }
 }
 
 void SLL::erase(size_t idx) {
-    Node* prev = getNode(idx - 1);
-    Node* temp = prev->_next;
-    prev->_next = prev->_next->_next;
-    delete temp;
-    --_size;
+    if (idx == 0) {
+        popFront();
+    }
+    else if (0 < idx && idx < _size) {
+        Node* prev = getNode(idx - 1);
+        Node* temp = prev->_next;
+        prev->_next = prev->_next->_next;
+        delete temp;
+        --_size;
+    }
+    else {
+        throw std::out_of_range("Invalid index");
+    }
 }
 
 void SLL::clear() {
@@ -94,13 +112,16 @@ void SLL::clear() {
     }
 }
 
-ValueType& SLL::front() {
+ValueType& SLL::front() const {
+    if (!_head) {
+        throw std::logic_error("Empty linked list");
+    }
     return _head->_value;
 }
+
 ValueType& SLL::operator[](size_t idx) {
     Node* cur = getNode(idx);
     return cur->_value;
-
 }
 
 const ValueType& SLL::operator[](size_t idx) const {
